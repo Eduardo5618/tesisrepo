@@ -1,23 +1,83 @@
 const Payment = require("../models/payment.model");
+const ServicioPendiente = require("../models/servicioPendiente.model");
 
-const createPayment = async (paymentData) => {
+const processMultipleServicesPayment = async (memberId, date, services) => {
   try {
-    console.log("Intentando guardar en la base de datos con:", paymentData);
+    const servicesArray = [];
+    let totalAmount = 0; 
+    let moraAplicada = false;
+    const hoy = new Date();
+    const mesActual = hoy.getMonth() + 1; 
+    const anioActual = hoy.getFullYear();
 
-    if (!paymentData.memberId || !paymentData.amount) {
-      throw new Error("Datos incompletos: `memberId` y `amount` son obligatorios.");
+    for (const service of services) {
+      const { name, amount, periodo } = service;
+
+      if (!name || !amount || !periodo ) {
+        throw new Error("Cada servicio debe incluir 'name', 'amount' y 'periodo'.");
+      }
+      const [mesStr, anioStr] = periodo.split("-");
+      const mesServicio = new Date(`${mesStr} 1, ${anioStr}`).getMonth() + 1; 
+      const anioServicio = parseInt(anioStr, 10) + (anioStr.length === 2 ? 2000 : 0);
+
+      if (anioServicio === anioActual && mesServicio === mesActual) {
+        console.log(`Servicio '${name}' del periodo '${periodo}' es actual y no requiere validación.`);
+      } else if (anioServicio < anioActual || (anioServicio === anioActual && mesServicio < mesActual)) {
+        const servicioPendiente = await ServicioPendiente.findOne({
+          memberId,
+          servicio: name,
+          periodo,
+          estado: "pendiente",
+        });
+
+        if (!servicioPendiente) {
+          throw new Error(`El servicio '${name}' para el periodo '${periodo}' no está pendiente o no existe.`);
+        }
+
+       if (servicioPendiente.monto !== amount) {
+        throw new Error(
+          `El monto enviado (${amount}) para el servicio '${name}' no coincide con el monto pendiente (${servicioPendiente.monto}).`
+        );
+      }        
+
+        if (!moraAplicada) {
+          moraAplicada = true;
+          const moraService = {
+            name: "Mora",
+            amount: 10,
+            periodo: `${mesStr}-${anioStr}`,
+            razon: "Se aplicó porque uno o más servicios están vencidos.",
+          };
+          servicesArray.push(moraService);
+          totalAmount += moraService.amount;
+        }
+
+        servicioPendiente.estado = "pagado";
+        await servicioPendiente.save();
+      }
+
+      servicesArray.push({ name, amount, periodo });
+      totalAmount += amount;
     }
 
-    const payment = new Payment(paymentData);
-    await payment.save();
-    console.log("Pago guardado correctamente en la base de datos:", payment);
+    const newPayment = new Payment({
+      memberId,
+      services: servicesArray,
+      totalAmount,
+      date,
+    });
 
-    return payment;
+    await newPayment.save();
+
+    return {
+      message: "Pago registrado correctamente.",
+      payment: newPayment,
+    };
   } catch (error) {
-    console.error("Error al guardar el pago en la base de datos:", error.message);
+    console.error("Error al procesar el pago:", error.message);
     throw error;
   }
 };
 
-module.exports = { createPayment };
 
+module.exports = { processMultipleServicesPayment };
