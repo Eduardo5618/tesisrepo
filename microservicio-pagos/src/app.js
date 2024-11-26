@@ -3,8 +3,12 @@ const bodyParser = require("body-parser");
 require("dotenv").config();
 const mongoose = require("mongoose");
 const { connectRabbitMQ } = require("./config/rabbitmq.service");
+
+
 const paymentRoutes = require("./routes/payments.routes");
 const { consumeValidatedPayments, consumeErrorPayments } = require("./consumers/payments.consumer");
+
+const pendingPaymentsRoutes = require("./routes/pendingPayments.routes"); // Nuevas rutas
 
 
 const app = express();
@@ -25,6 +29,7 @@ connectRabbitMQ()
 
 // Rutas de pagos
 app.use("/api/pagos", paymentRoutes);
+app.use("/api/pagos-pendientes", pendingPaymentsRoutes);
 
 module.exports = app;
 

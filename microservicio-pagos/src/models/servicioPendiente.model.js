@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const servicioPendienteSchema = new mongoose.Schema({
-    memberId: { type: String, required: true },        // ID del socio
+    memberId: { type: String, required: true },// ID del socio
     servicio: { type: String, required: true },       // Nombre del servicio
     monto: { type: Number, required: true },          // Monto del servicio
     fechaVencimiento: { type: Date, required: true }, // Fecha límite de pago
