@@ -9,5 +9,17 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.7"
-  }
+  },
+  "name": "microservicio-pagos-actuales",
+  "version": "1.0.0",
+  "main": "seedServiciosPendientes.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }

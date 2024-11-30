@@ -1,29 +1,20 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-require("dotenv").config();
-const connectDB = require("./config/db");
-const { connectRabbitMQ } = require("./config/rabbitmq.service");
-const paymentRoutes = require("./routes/payments.routes");
-
-
+// src/app.js
+const express = require('express');
+const bodyParser = require('body-parser');
+const pagosRoutes = require('./routes/pagosRoutes');
+const connectDB = require('./config/db');
+require('dotenv').config();
 
 const app = express();
+
+// Middleware
 app.use(bodyParser.json());
 
-// Conectar a MongoDB
+// Conectar a la base de datos
 connectDB();
 
-// Conectar a RabbitMQ y consumir colas
-/*connectRabbitMQ()
-  .then(() => {
-    consumeValidatedPayments(); 
-    consumeErrorPayments();
-  })
-  .catch((err) => console.error("Error al conectar a RabbitMQ:", err));*/
-
-// Rutas de pagos
-
-app.use("/api/pagos", paymentRoutes);
+// Usar las rutas de pagos
+app.use('/api/pagos', pagosRoutes);
 
 module.exports = app;
 

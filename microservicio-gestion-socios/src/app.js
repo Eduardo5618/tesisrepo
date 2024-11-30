@@ -1,8 +1,8 @@
-require('dotenv').config({ path: '../.env' }); 
+require('dotenv').config(); 
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const { consumePaymentMessages } = require("./consumers/payments.consumer");
+const { startValidateMemberConsumer } = require("./consumers/validateMember.consumer");
 const sociosRoutes = require('./routes/sociosRoutes');
 
 const app = express();
@@ -13,9 +13,6 @@ app.use(bodyParser.json());
 // Rutas
 app.use('/api/socios', sociosRoutes);
 
-consumePaymentMessages();
+//startValidateMemberConsumer();
 
-const PORT = process.env.PORT || 3002;
-app.listen(PORT, () => {
-  console.log(`Servidor de Gestión de Socios corriendo en http://localhost:${PORT}`);
-});
+module.exports = app;

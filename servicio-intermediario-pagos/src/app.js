@@ -1,12 +1,12 @@
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
-require("dotenv").config();
-const paymentRoutes = require("./routes/payment.routes");
+const paymentRoutes = require("./routes/pagosRoutes");
 
 const app = express();
 app.use(bodyParser.json());
 
-// Rutas del servicio intermediario
+// Rutas
 app.use("/api/intermediario-pagos", paymentRoutes);
 
 module.exports = app;
