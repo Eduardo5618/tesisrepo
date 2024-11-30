@@ -4,13 +4,12 @@ const axios = require('axios');
 // Función para procesar la solicitud de pago
 const registrarPago = async (req, res) => {
   const { memberId, date, services } = req.body.data;
+  //ESTRUCTURA RECIBIDA
   console.log(req.body.data);
-
   try {
+    //VALIDA SI EL SOCIO EXISTE
     console.log(memberId);
     console.log(`Validando el socio con ID: ${memberId}`);
-
-    //VALIDA SI EL SOCIO EXISTE
     const socioValido = await validateMember(memberId);
     if (!socioValido) {
       return res.status(400).json({ error: `El socio con ID ${memberId} no existe.` });
@@ -41,7 +40,6 @@ const registrarPago = async (req, res) => {
               console.error(`El monto para el servicio ${service.servicio} es incorrecto. Esperado: ${servicioAtrasado.monto}, pero recibido: ${service.monto}`);
               return false; 
             }
-    
             service.estadoPeriodo = `atrasado-${service.estado}`;
             const { _id, memberId, __v, fechaVencimiento, estado, ...serviceData } = service;
             return serviceData;  // Devolvemos solo los datos necesarios
@@ -59,7 +57,6 @@ const registrarPago = async (req, res) => {
         return res.status(500).json({ error: 'Error al validar los pagos atrasados. No se puede registrar el pago.' });
       }
     }
-
     // Paso 4: Crear el pago consolidado, eliminando el campo `fechaVencimiento` si existe
     const pagoConsolidado = {
       memberId,
@@ -91,11 +88,22 @@ const registrarPago = async (req, res) => {
       }, 0),
     };
 
+  
     console.log('Pago consolidado: ', pagoConsolidado);
-
     const responsePagoActuales = await axios.post('http://localhost:3004/api/pagos/registrar', pagoConsolidado);
-    
-    // Paso 6: Confirmar que el pago fue registrado correctamente
+    try{
+      console.log('Se generara una nota de pago');
+      const responseRecibo = await axios.post('http://localhost:3005/api/recibos/generar', {
+        memberId,
+        date,
+        services: pagoConsolidado.services,
+        totalAmount: pagoConsolidado.totalAmount
+      });
+      console.log('Recibo generado correctamente:', responseRecibo.data);
+    }catch(error){
+      console.error('Error al generar el recibo:', error.message);
+    }
+
     console.log('Pago ingresado correctamente')
     res.status(200).json({ message: 'Pago registrado correctamente.', pago: responsePagoActuales.data });
   } catch (error) {
@@ -105,5 +113,22 @@ const registrarPago = async (req, res) => {
 };
 
 
-module.exports = { registrarPago };
+const obtenerPagosSocio = async (req, res) => {
+  const { memberId } = req.params;
+
+  try {
+    const response = await axios.get(`http://localhost:3004/api/pagos/${memberId}`);
+    if (response.status === 200) {
+      // Si se obtienen los pagos, responder con los datos
+      return res.status(200).json(response.data);
+    } else {
+      return res.status(404).json({ message: 'No se encontraron pagos para este socio' });
+    }
+  } catch (error) {
+    console.error('Error al obtener pagos:', error.message);
+    return res.status(500).json({ error: 'Error al obtener los pagos.' });
+  }
+};
+
+module.exports = { registrarPago,obtenerPagosSocio};
 

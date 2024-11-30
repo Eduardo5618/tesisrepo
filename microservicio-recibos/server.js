@@ -1,31 +1,7 @@
-const express = require('express');
-const connectDB = require('./src/config/db');
-const reciboRoutes = require('./src/routes/reciboRoutes');
-const { connectRabbitMQ } = require('./src/config/messaging');
+require('dotenv').config();  // Asegúrate de que dotenv esté cargado
+const app = require("./src/app");
 
-
-const app = express();
-
-// Middleware
-app.use(express.json());
-
-// Rutas
-app.use('/api', reciboRoutes);
-
-// Conectar a MongoDB
-connectDB();
-
-// Conectar a RabbitMQ
-connectRabbitMQ()
-    .then(() => {
-        consumePaymentEvents();
-    })
-    .catch((err) => {
-        console.error('Error al conectar a RabbitMQ:', err.message);
-    });
-
-// Iniciar servidor
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto ${PORT}`);
+  console.log(`Servicio recibos corriendo en http://localhost:${PORT}`);
 });
