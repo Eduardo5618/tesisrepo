@@ -6,5 +6,5 @@ connectDB();
 const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
-  console.log(`Microservicio de Pagos Pendientes corriendo en http://localhost:${PORT}`);
+  console.log(`Microservicio de Pagos Pendientes corriendo en ${PORT}`);
 });

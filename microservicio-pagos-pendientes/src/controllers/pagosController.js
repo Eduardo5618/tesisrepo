@@ -53,13 +53,11 @@ const validarPagosPendientes = async (req, res) => {
       return res.status(404).json({ success: false, message: 'No se encontraron pagos pendientes.' });
     }
 
-    // 2. Compara los montos
     const pagosValidos = pagosPendientes.every((pago, index) => {
         const service = services.find(s => s.periodo === pago.periodo);
         return service && service.monto === pago.monto;  // Si el monto no coincide, no validamos este pago
     });
 
-    // Si algún pago no es válido (montos no coinciden)
     if (!pagosValidos) {
         return res.status(400).json({ success: false, message: 'Los montos de los pagos pendientes no coinciden con los registros.' });
     }

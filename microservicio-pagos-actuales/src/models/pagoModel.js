@@ -16,6 +16,7 @@ const paymentSchema = new mongoose.Schema({
         required: [true, "El campo `totalAmount` es obligatorio"]
     },
 });
+
 module.exports = mongoose.model("Payment", paymentSchema);
 
 

@@ -1,13 +1,14 @@
 const axios = require('axios');
 
+require('dotenv').config();
 /**
  * @param {string} memberId - ID del socio a validar.
  * @returns {Promise<boolean>} - Devuelve true si el socio existe, false si no.
  */
-
+ 
 const validateMember = async (memberId) => {
   try {
-    const response = await axios.get(`http://localhost:3002/api/socios/${memberId}`);
+    const response = await axios.get(`${process.env.MICROSERVICIO_SOCIOS_URL}/${memberId}`);
     
     if (response.status === 200 && response.data) {
       console.log(`Socio con ID ${memberId} existe.`);

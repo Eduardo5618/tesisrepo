@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: microservicio-pagos-pendientes
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3003
+    targetPort: 3003

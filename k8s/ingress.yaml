@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: microservicios-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: localhost
+    http:
+      paths:
+      - path: /pagos-pendientes
+        pathType: Prefix
+        backend:
+          service:
+            name: microservicio-pagos-pendientes
+            port:
+              number: 3003
+        path: /api/pagos
+e
